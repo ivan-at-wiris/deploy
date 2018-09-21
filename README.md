@@ -1,17 +1,9 @@
 Ansistrano
 ==========
 
-[![Build Status](https://travis-ci.org/ansistrano/deploy.svg?branch=master)](https://travis-ci.org/ansistrano/deploy)
-[![Total Deployments](https://img.shields.io/badge/dynamic/json.svg?label=overall&uri=https%3A%2F%2Fansistrano.com%2Finfo&query=deployments.total&colorB=green&suffix=%20deployments)](https://ansistrano.com)
-[![Year Deployments](https://img.shields.io/badge/dynamic/json.svg?label=year&uri=https%3A%2F%2Fansistrano.com%2Finfo&query=deployments.year&colorB=green&suffix=%20deployments)](https://ansistrano.com)
-[![Month Deployments](https://img.shields.io/badge/dynamic/json.svg?label=month&uri=https%3A%2F%2Fansistrano.com%2Finfo&query=deployments.month&colorB=green&suffix=%20deployments)](https://ansistrano.com)
-[![Today Deployments](https://img.shields.io/badge/dynamic/json.svg?label=today&uri=https%3A%2F%2Fansistrano.com%2Finfo&query=deployments.today&colorB=green&suffix=%20deployments)](https://ansistrano.com)
-
 **ansistrano.deploy** and **ansistrano.rollback** are Ansible roles to easily manage the deployment process for scripting applications such as PHP, Python and Ruby. It's an Ansible port for Capistrano.
 
 - [Requirements](#requirements)
-- [Installation](#installation)
-- [Update](#update)
 - [Features](#features)
 - [Main workflow](#main-workflow)
 - [Role Variables](#role-variables)
@@ -21,8 +13,6 @@ Ansistrano
 - [Hooks: Custom tasks](#hooks-custom-tasks)
 - [Variables in custom tasks](#variables-in-custom-tasks)
 - [Pruning old releases](#pruning-old-releases)
-- [Example Playbook](#example-playbook)
-- [Sample projects](#sample-projects)
 
 History
 -------
@@ -38,66 +28,12 @@ Project name
 
 Ansistrano comes from Ansible + Capistrano, easy, isn't it?
 
-Ansistrano anonymous usage stats
---------------------------------
+BC Breaks in 2.0
+----------------
 
-We have recently added an extra optional step in Ansistrano so that we can know how many people are deploying their applications with our project. Unfortunately, Ansible Galaxy does not provide any numbers on usage or downloads so this is one of the only ways we have to measure how many users we really have.
-
-You can check the code we use to store your anonymous stats at [the ansistrano.com repo](https://github.com/ansistrano/ansistrano.com) and anyway, if you are not comfortable with this, you will always be able to disable this extra step by setting `ansistrano_allow_anonymous_stats` to false in your playbooks.
-
-Who is using Ansistrano?
-------------------------
-
-Is Ansistrano ready to be used? Here are some companies currently using it:
-
-* [ABA English](http://www.abaenglish.com/)
-* [Another Place Productions](http://www.anotherplaceproductions.com)
-* [Atrápalo](http://www.atrapalo.com)
-* [Beroomers](https://www.beroomers.com)
-* [CMP Group](http://www.teamcmp.com)
-* [Cabissimo](https://www.cabissimo.com)
-* [Claranet France](http://www.claranet.fr/)
-* [Clearpoint](http://www.clearpoint.co.nz)
-* [Clever Age](https://www.clever-age.com)
-* [CridaDemocracia](https://cridademocracia.org)
-* [Cycloid](http://www.cycloid.io)
-* [Deliverea](https://www.deliverea.com/)
-* [EnAlquiler](http://www.enalquiler.com/)
-* [Euromillions.com](http://euromillions.com/)
-* [Finizens](https://finizens.com/)
-* [Fluxus](http://www.fluxus.io/)
-* [Gstock](http://www.g-stock.es)
-* [HackSoft](https://hacksoft.io/)
-* [HackConf](https://hackconf.bg/en/)
-* [Hexanet](https://www.hexanet.fr)
-* [Holaluz](https://www.holaluz.com)
-* [Hosting4devs](https://hosting4devs.com)
-* [Jolicode](http://jolicode.com/)
-* [Kidfund](http://link.kidfund.us/github "Kidfund")
-* [Lumao SAS](https://lumao.eu)
-* [MEDIA.figaro](http://media.figaro.fr)
-* [Moss](https://moss.sh)
-* [Nice&Crazy](http://www.niceandcrazy.com)
-* [Nodo Ámbar](http://www.nodoambar.com/)
-* [Oferplan](http://oferplan.com/)
-* [Ofertix](http://www.ofertix.com)
-* [Òmnium Cultural](https://www.omnium.cat)
-* [OpsWay Software Factory](http://opsway.com)
-* [Spotahome](https://www.spotahome.com)
-* [Suntransfers](http://www.suntransfers.com)
-* [TechPump](http://www.techpump.com/)
-* [Tienda Online VirginMobile](https://cambiate.virginmobile.cl)
-* [The Cocktail](https://the-cocktail.com/)
-* [Timehook](https://timehook.io)
-* [TMTFactory](https://tmtfactory.com)
-* [UNICEF Comité Español](https://www.unicef.es)
-* [Ulabox](https://www.ulabox.com)
-* [Uvinum](http://www.uvinum.com)
-* [VirginMobile Chile](https://empresas.virginmobile.cl)
-* [Wavecontrol](http://monitoring.wavecontrol.com/ca/public/demo/)
-* [Yubl](https://yubl.me/)
-
-If you are also using it, please let us know via a PR to this document.
+* Minimum Ansible version supported is 1.9
+* `ansistrano_releases_path` and `ansistrano_shared_path` are now defined as defaults so if you use them in your hooks
+you should stop referring to the stdout string and just use the variable
 
 Requirements
 ------------
@@ -106,24 +42,6 @@ In order to deploy your apps with Ansistrano, you will need:
 
 * Ansible in your deployer machine
 * `rsync` on the target machine if you are using either the `rsync` or `git` deployment strategy or if you are using `ansistrano_current_via = rsync`
-
-Installation
-------------
-
-Ansistrano is an Ansible role distributed globally using [Ansible Galaxy](https://galaxy.ansible.com/). In order to install Ansistrano role you can use the following command.
-
-```
-$ ansible-galaxy install ansistrano.deploy ansistrano.rollback
-```
-
-Update
-------
-
-If you want to update the role, you need to pass **--force** parameter when installing. Please, check the following command:
-
-```
-$ ansible-galaxy install --force ansistrano.deploy ansistrano.rollback
-```
 
 Features
 --------
@@ -181,7 +99,6 @@ vars:
   ansistrano_ensure_basedirs_shared_files_exist: yes
 
   ansistrano_deploy_via: "rsync" # Method used to deliver the code to the server. Options are copy, rsync, git, svn, s3 or download. Copy, download and s3 have an optional step to unarchive the downloaded file which can be used by adding _unarchive. You can check all the options inside tasks/update-code folder!
-  ansistrano_allow_anonymous_stats: yes
 
   # Variables used in the rsync deployment strategy
   ansistrano_rsync_extra_params: "" # Extra parameters to use when deploying with rsync in a single string. Although Ansible allows an array this can cause problems if we try to add multiple --include args as it was reported in https://github.com/ansistrano/deploy/commit/e98942dc969d4e620313f00f003a7ea2eab67e86
@@ -227,7 +144,6 @@ vars:
   # Optional variables, omitted by default
   ansistrano_s3_aws_access_key: YOUR_AWS_ACCESS_KEY
   ansistrano_s3_aws_secret_key: YOUR_AWS_SECRET_KEY
-  ansistrano_s3_ignore_nonexistent_bucket: false
   
   # Variables used in the GCS deployment strategy
   ansistrano_gcs_bucket: gcsbucket
@@ -419,116 +335,6 @@ Just set `ansistrano_use_hardlinks` to `yes`.
 Not fully tested. Today only works with `ansistrano_deploy_via: "rsync"`. 
 Check if your system supports `cp -l` and your filesystem supports hard links, like `ext2/3/4`. 
 Not useful if your filesystem already has _Data deduplication_, like `ZFS` or `Btrfs`. 
-
-Example Playbook
-----------------
-
-In the folder, `example` you can check an example project that shows how to deploy a small application with Ansistrano.
-
-In order to run it, you will need to have Vagrant and the ansistrano roles installed. Please check https://www.vagrantup.com for more information about Vagrant and our Installation section.
-
-```
-$ cd example/my-playbook
-$ vagrant up
-$ ansible-playbook -i hosts deploy.yml
-```
-
-And after running these commands, the index.html located in the `my-app` folder will be deployed to both vagrant boxes
-
-In order to test the rollback playbook, you will need to run deploy.yml at least twice (so that there is something to rollback to). And once this is done, you only need to run
-
-```
-$ ansible-playbook -i hosts rollback.yml
-```
-
-You can check more advanced examples inside the test folder which are run against Travis-CI
-
-Sample projects
----------------
-
-We have added Ansistrano support for other projects we are working on.
-
-* LastWishes: Domain-Driven Design PHP Sample App: https://github.com/dddinphp/last-wishes
-
-As an example, see the execution log of the LastWishes deployment:
-
-```
-PLAY [Deploy last wishes app to my server] ************************************
-
-GATHERING FACTS ***************************************************************
-ok: [quepimquepam.com]
-
-TASK: [ansistrano.deploy | Ensure deployment base path exists] ***
-ok: [quepimquepam.com]
-
-TASK: [ansistrano.deploy | Ensure releases folder exists] ***
-ok: [quepimquepam.com]
-
-TASK: [ansistrano.deploy | Ensure shared elements folder exists] ***
-ok: [quepimquepam.com]
-
-TASK: [ansistrano.deploy | Get release timestamp] ***********
-changed: [quepimquepam.com]
-
-TASK: [ansistrano.deploy | Get release path] ****************
-changed: [quepimquepam.com]
-
-TASK: [ansistrano.deploy | Get releases path] ***************
-changed: [quepimquepam.com]
-
-TASK: [ansistrano.deploy | Get shared path (in rsync case)] ***
-changed: [quepimquepam.com]
-
-TASK: [ansistrano.deploy | Rsync application files to remote shared copy (in rsync case)] ***
-changed: [quepimquepam.com -> 127.0.0.1]
-
-TASK: [ansistrano.deploy | Deploy existing code to servers] ***
-changed: [quepimquepam.com]
-
-TASK: [ansistrano.deploy | Deploy existing code to remote servers] ***
-skipping: [quepimquepam.com]
-
-TASK: [ansistrano.deploy | Update remote repository] ********
-skipping: [quepimquepam.com]
-
-TASK: [ansistrano.deploy | Export a copy of the repo] *******
-skipping: [quepimquepam.com]
-
-TASK: [ansistrano.deploy | Deploy code from to servers] *****
-skipping: [quepimquepam.com]
-
-TASK: [ansistrano.deploy | Copy release version into REVISION file] ***
-changed: [quepimquepam.com]
-
-TASK: [ansistrano.deploy | Touches up the release code] *****
-changed: [quepimquepam.com]
-
-TASK: [ansistrano.deploy | Change softlink to new release] ***
-changed: [quepimquepam.com]
-
-TASK: [ansistrano.deploy | Reload Apache] *******************
-changed: [quepimquepam.com]
-
-TASK: [ansistrano.deploy | Clean up releases] ***************
-skipping: [quepimquepam.com]
-
-PLAY RECAP ********************************************************************
-quepimquepam.com           : ok=14   changed=10   unreachable=0    failed=0
-```
-
-They're talking about us
-------------------------
-
-* [Pablo Godel - Deploying Symfony - Symfony Cat 2016](https://youtu.be/K2bBhrkmpSg?t=26m)
-* [https://www.artansoft.com/2016/05/deploy-de-proyectos-php-ansistrano/](https://www.artansoft.com/2016/05/deploy-de-proyectos-php-ansistrano/)
-* [http://alexmoreno.net/ansistrano-deploying-drupal-ansible](http://alexmoreno.net/ansistrano-deploying-drupal-ansible)
-* [http://www.ricardclau.com/2015/10/deploying-php-applications-with-ansistrano/](http://www.ricardclau.com/2015/10/deploying-php-applications-with-ansistrano/)
-* [http://es.slideshare.net/OrestesCA/ansible-intro-ansible-barcelona-user-group-june-2015](http://es.slideshare.net/OrestesCA/ansible-intro-ansible-barcelona-user-group-june-2015)
-* [http://carlosbuenosvinos.com/deploying-symfony-and-php-apps-with-ansistrano/](http://carlosbuenosvinos.com/deploying-symfony-and-php-apps-with-ansistrano/)
-* [https://www.youtube.com/watch?v=CPz5zPzzMZE](https://www.youtube.com/watch?v=CPz5zPzzMZE)
-* [https://github.com/cbrunnkvist/ansistrano-symfony-deploy](https://github.com/cbrunnkvist/ansistrano-symfony-deploy)
-* [https://www.reddit.com/r/ansible/comments/2ezzz5/rapid_rollback_with_ansible/](https://www.reddit.com/r/ansible/comments/2ezzz5/rapid_rollback_with_ansible/)
-* [Cookiecutting Ansible for Django](https://hacksoft.io/blog/cookiecutting-django-ansible/)
 
 License
 -------
