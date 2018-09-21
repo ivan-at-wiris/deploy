@@ -2,6 +2,10 @@ Ansistrano
 ==========
 
 [![Build Status](https://travis-ci.org/ansistrano/deploy.svg?branch=master)](https://travis-ci.org/ansistrano/deploy)
+[![Total Deployments](https://img.shields.io/badge/dynamic/json.svg?label=overall&uri=https%3A%2F%2Fansistrano.com%2Finfo&query=deployments.total&colorB=green&suffix=%20deployments)](https://ansistrano.com)
+[![Year Deployments](https://img.shields.io/badge/dynamic/json.svg?label=year&uri=https%3A%2F%2Fansistrano.com%2Finfo&query=deployments.year&colorB=green&suffix=%20deployments)](https://ansistrano.com)
+[![Month Deployments](https://img.shields.io/badge/dynamic/json.svg?label=month&uri=https%3A%2F%2Fansistrano.com%2Finfo&query=deployments.month&colorB=green&suffix=%20deployments)](https://ansistrano.com)
+[![Today Deployments](https://img.shields.io/badge/dynamic/json.svg?label=today&uri=https%3A%2F%2Fansistrano.com%2Finfo&query=deployments.today&colorB=green&suffix=%20deployments)](https://ansistrano.com)
 
 **ansistrano.deploy** and **ansistrano.rollback** are Ansible roles to easily manage the deployment process for scripting applications such as PHP, Python and Ruby. It's an Ansible port for Capistrano.
 
@@ -34,13 +38,6 @@ Project name
 
 Ansistrano comes from Ansible + Capistrano, easy, isn't it?
 
-BC Breaks in 2.0
-----------------
-
-* Minimum Ansible version supported is 1.9
-* `ansistrano_releases_path` and `ansistrano_shared_path` are now defined as defaults so if you use them in your hooks
-you should stop referring to the stdout string and just use the variable
-
 Ansistrano anonymous usage stats
 --------------------------------
 
@@ -64,6 +61,7 @@ Is Ansistrano ready to be used? Here are some companies currently using it:
 * [Clever Age](https://www.clever-age.com)
 * [CridaDemocracia](https://cridademocracia.org)
 * [Cycloid](http://www.cycloid.io)
+* [Deliverea](https://www.deliverea.com/)
 * [EnAlquiler](http://www.enalquiler.com/)
 * [Euromillions.com](http://euromillions.com/)
 * [Finizens](https://finizens.com/)
@@ -76,6 +74,8 @@ Is Ansistrano ready to be used? Here are some companies currently using it:
 * [Hosting4devs](https://hosting4devs.com)
 * [Jolicode](http://jolicode.com/)
 * [Kidfund](http://link.kidfund.us/github "Kidfund")
+* [Lumao SAS](https://lumao.eu)
+* [MEDIA.figaro](http://media.figaro.fr)
 * [Moss](https://moss.sh)
 * [Nice&Crazy](http://www.niceandcrazy.com)
 * [Nodo Ámbar](http://www.nodoambar.com/)
@@ -86,7 +86,9 @@ Is Ansistrano ready to be used? Here are some companies currently using it:
 * [Spotahome](https://www.spotahome.com)
 * [Suntransfers](http://www.suntransfers.com)
 * [TechPump](http://www.techpump.com/)
+* [Tienda Online VirginMobile](https://cambiate.virginmobile.cl)
 * [The Cocktail](https://the-cocktail.com/)
+* [Timehook](https://timehook.io)
 * [TMTFactory](https://tmtfactory.com)
 * [UNICEF Comité Español](https://www.unicef.es)
 * [Ulabox](https://www.ulabox.com)
@@ -111,7 +113,7 @@ Installation
 Ansistrano is an Ansible role distributed globally using [Ansible Galaxy](https://galaxy.ansible.com/). In order to install Ansistrano role you can use the following command.
 
 ```
-$ ansible-galaxy install carlosbuenosvinos.ansistrano-deploy carlosbuenosvinos.ansistrano-rollback
+$ ansible-galaxy install ansistrano.deploy ansistrano.rollback
 ```
 
 Update
@@ -120,7 +122,7 @@ Update
 If you want to update the role, you need to pass **--force** parameter when installing. Please, check the following command:
 
 ```
-$ ansible-galaxy install --force carlosbuenosvinos.ansistrano-deploy carlosbuenosvinos.ansistrano-rollback
+$ ansible-galaxy install --force ansistrano.deploy ansistrano.rollback
 ```
 
 Features
@@ -185,6 +187,7 @@ vars:
   ansistrano_rsync_extra_params: "" # Extra parameters to use when deploying with rsync in a single string. Although Ansible allows an array this can cause problems if we try to add multiple --include args as it was reported in https://github.com/ansistrano/deploy/commit/e98942dc969d4e620313f00f003a7ea2eab67e86
   ansistrano_rsync_set_remote_user: yes # See [ansible synchronize module](http://docs.ansible.com/ansible/synchronize_module.html). Options are yes, no.
   ansistrano_rsync_path: "" # See [ansible synchronize module](http://docs.ansible.com/ansible/synchronize_module.html). By default is "sudo rsync", it can be overwriten with (example): "sudo -u user rsync".
+  ansistrano_rsync_use_ssh_args: no # See [ansible synchronize module](http://docs.ansible.com/ansible/synchronize_module.html). If set yes, use the ssh_args specified in ansible.cfg.
 
   # Variables used in the Git deployment strategy
   ansistrano_git_repo: git@github.com:USERNAME/REPO.git # Location of the git repository
@@ -192,8 +195,10 @@ vars:
   ansistrano_git_repo_tree: "" # If specified the subtree of the repository to deploy
   ansistrano_git_identity_key_path: "" # If specified this file is copied over and used as the identity key for the git commands, path is relative to the playbook in which it is used
   ansistrano_git_identity_key_remote_path: "" # If specified this file on the remote server is used as the identity key for the git commands, remote path is absolute
-  # Optional variable, omitted by default
+  # Optional variables, omitted by default
   ansistrano_git_refspec: ADDITIONAL_GIT_REFSPEC # Additional refspec to be used by the 'git' module. Uses the same syntax as the 'git fetch' command.
+  ansistrano_git_ssh_opts: "-o StrictHostKeyChecking=no" # Additional ssh options to be used in Git
+  ansistrano_git_depth: 1 # Additional history truncated to the specified number or revisions
 
   # Variables used in the SVN deployment strategy
   # Please note there was a bug in the subversion module in Ansible 1.8.x series (https://github.com/ansible/ansible-modules-core/issues/370) so it is only supported from Ansible 1.9
@@ -222,6 +227,15 @@ vars:
   # Optional variables, omitted by default
   ansistrano_s3_aws_access_key: YOUR_AWS_ACCESS_KEY
   ansistrano_s3_aws_secret_key: YOUR_AWS_SECRET_KEY
+  ansistrano_s3_ignore_nonexistent_bucket: false
+  
+  # Variables used in the GCS deployment strategy
+  ansistrano_gcs_bucket: gcsbucket
+  ansistrano_gcs_object: gcsobject.tgz # Add the _unarchive suffix to the ansistrano_deploy_via if your object is a package (ie: s3_unarchive)
+  ansistrano_gcs_region: eu-west-1 # https://cloud.google.com/storage/docs/bucket-locations
+  # Optional variables, omitted by default
+  ansistrano_gcs_access_key: YOUR_GCS_ACCESS_KEY # navigate to Cloud console > Storage > Settings > Interoperability
+  ansistrano_gcs_secret_key: YOUR_GCS_SECRET_KEY
 
   # Hooks: custom tasks if you need them
   ansistrano_before_setup_tasks_file: "{{ playbook_dir }}/<your-deployment-config>/my-before-setup-tasks.yml"
@@ -246,7 +260,7 @@ In order to deploy with Ansistrano, you need to perform some steps:
 * Create a new `hosts` file. Check [ansible inventory documentation](http://docs.ansible.com/intro_inventory.html) if you need help. This file will identify all the hosts where to deploy to. For multistage environments check [Multistage environments](#multistage-environment-devel-preprod-prod-etc).
 * Create a new playbook for deploying your app, for example, `deploy.yml`
 * Set up role variables (see [Role Variables](#role-variables))
-* Include the `carlosbuenosvinos.ansistrano-deploy` role as part of a play
+* Include the `ansistrano.deploy` role as part of a play
 * Run the deployment playbook
 
 ```ansible-playbook -i hosts deploy.yml```
@@ -444,58 +458,58 @@ PLAY [Deploy last wishes app to my server] ************************************
 GATHERING FACTS ***************************************************************
 ok: [quepimquepam.com]
 
-TASK: [carlosbuenosvinos.ansistrano-deploy | Ensure deployment base path exists] ***
+TASK: [ansistrano.deploy | Ensure deployment base path exists] ***
 ok: [quepimquepam.com]
 
-TASK: [carlosbuenosvinos.ansistrano-deploy | Ensure releases folder exists] ***
+TASK: [ansistrano.deploy | Ensure releases folder exists] ***
 ok: [quepimquepam.com]
 
-TASK: [carlosbuenosvinos.ansistrano-deploy | Ensure shared elements folder exists] ***
+TASK: [ansistrano.deploy | Ensure shared elements folder exists] ***
 ok: [quepimquepam.com]
 
-TASK: [carlosbuenosvinos.ansistrano-deploy | Get release timestamp] ***********
+TASK: [ansistrano.deploy | Get release timestamp] ***********
 changed: [quepimquepam.com]
 
-TASK: [carlosbuenosvinos.ansistrano-deploy | Get release path] ****************
+TASK: [ansistrano.deploy | Get release path] ****************
 changed: [quepimquepam.com]
 
-TASK: [carlosbuenosvinos.ansistrano-deploy | Get releases path] ***************
+TASK: [ansistrano.deploy | Get releases path] ***************
 changed: [quepimquepam.com]
 
-TASK: [carlosbuenosvinos.ansistrano-deploy | Get shared path (in rsync case)] ***
+TASK: [ansistrano.deploy | Get shared path (in rsync case)] ***
 changed: [quepimquepam.com]
 
-TASK: [carlosbuenosvinos.ansistrano-deploy | Rsync application files to remote shared copy (in rsync case)] ***
+TASK: [ansistrano.deploy | Rsync application files to remote shared copy (in rsync case)] ***
 changed: [quepimquepam.com -> 127.0.0.1]
 
-TASK: [carlosbuenosvinos.ansistrano-deploy | Deploy existing code to servers] ***
+TASK: [ansistrano.deploy | Deploy existing code to servers] ***
 changed: [quepimquepam.com]
 
-TASK: [carlosbuenosvinos.ansistrano-deploy | Deploy existing code to remote servers] ***
+TASK: [ansistrano.deploy | Deploy existing code to remote servers] ***
 skipping: [quepimquepam.com]
 
-TASK: [carlosbuenosvinos.ansistrano-deploy | Update remote repository] ********
+TASK: [ansistrano.deploy | Update remote repository] ********
 skipping: [quepimquepam.com]
 
-TASK: [carlosbuenosvinos.ansistrano-deploy | Export a copy of the repo] *******
+TASK: [ansistrano.deploy | Export a copy of the repo] *******
 skipping: [quepimquepam.com]
 
-TASK: [carlosbuenosvinos.ansistrano-deploy | Deploy code from to servers] *****
+TASK: [ansistrano.deploy | Deploy code from to servers] *****
 skipping: [quepimquepam.com]
 
-TASK: [carlosbuenosvinos.ansistrano-deploy | Copy release version into REVISION file] ***
+TASK: [ansistrano.deploy | Copy release version into REVISION file] ***
 changed: [quepimquepam.com]
 
-TASK: [carlosbuenosvinos.ansistrano-deploy | Touches up the release code] *****
+TASK: [ansistrano.deploy | Touches up the release code] *****
 changed: [quepimquepam.com]
 
-TASK: [carlosbuenosvinos.ansistrano-deploy | Change softlink to new release] ***
+TASK: [ansistrano.deploy | Change softlink to new release] ***
 changed: [quepimquepam.com]
 
-TASK: [carlosbuenosvinos.ansistrano-deploy | Reload Apache] *******************
+TASK: [ansistrano.deploy | Reload Apache] *******************
 changed: [quepimquepam.com]
 
-TASK: [carlosbuenosvinos.ansistrano-deploy | Clean up releases] ***************
+TASK: [ansistrano.deploy | Clean up releases] ***************
 skipping: [quepimquepam.com]
 
 PLAY RECAP ********************************************************************
@@ -525,3 +539,4 @@ Other resources
 ---------------
 
 * [Thoughts on deploying with Ansible](http://www.future500.nl/articles/2014/07/thoughts-on-deploying-with-ansible/)
+* [Docker image](https://hub.docker.com/r/lavoweb/ansistrano/)

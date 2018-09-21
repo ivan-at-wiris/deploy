@@ -3,10 +3,10 @@ services:
   - docker
 
 env:
-  - ANSIBLE_VERSION: "1.9.5"
-  - ANSIBLE_VERSION: "2.1.6"
-  - ANSIBLE_VERSION: "2.2.3"
-  - ANSIBLE_VERSION: "2.3.1"
+  - ANSIBLE_VERSION: "2.3.3"
+  - ANSIBLE_VERSION: "2.4.6"
+  - ANSIBLE_VERSION: "2.5.7"
+  - ANSIBLE_VERSION: "2.6.2"
   - distribution: Ubuntu
     distribution_version: xenial
     init: /lib/systemd/systemd
@@ -25,11 +25,6 @@ env:
   - distribution: Debian
     distribution_version: jessie
     init: /lib/systemd/systemd
-    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
-    ANSIBLE_VERSION: docker
-  - distribution: Fedora
-    distribution_version: "24"
-    init: /usr/lib/systemd/systemd
     run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
     ANSIBLE_VERSION: docker
 
